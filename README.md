@@ -1,4 +1,4 @@
-# WeaselBiscuit / Process-Tailwind: emerging suspected DPRK-linked infostealer assessment
+# WeaselBiscuit: Emerging Suspected DPRK-linked Infostealer Assessment
 
 ![WeaselBiscuit Logo](WeaselBiscuit-logo-small.png)
 
