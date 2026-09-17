@@ -133,7 +133,14 @@ The infostealer uploads the following to the IP-hosted C2:
 - Changed clipboard contents, when the server enables monitoring.
 - Windows keyboard events, when the server enables monitoring.
 
-The Chrome extension-storage capability is financially relevant: it can expose wallet-extension state or other extension-held sensitive data. Clipboard and keylogging can capture credentials, API tokens, wallet addresses, or recovery phrases entered or copied during normal use. However, the code does **not** contain direct wallet draining, browser-password decryption, seed-phrase searching, or cryptocurrency transaction functionality.
+While this malware does not have the same crypto wallet stealer functions as its big siblings, the Chrome extension-storage capability is financially relevant: it can expose wallet-extension state or other extension-held sensitive data. It uploads **every readable, nonempty file** under the extension's `Local Extension Settings` directory — a raw LevelDB key/value store — wholesale. That store legitimately contains a mix of:
+
+- The victim's own account address(es) — typically a small number
+- Wallet extensions like MetaMask and their internally cached token/contract address list (used for balance display, price feeds, swap routing)
+- Address-book/contact entries (other people's addresses, not the victim's)
+- Various other cached metadata
+
+Meanwhile, clipboard and keylogging can capture credentials, API tokens, wallet addresses, or recovery phrases entered or copied during normal use. However, the code does **not** contain direct wallet draining, browser-password decryption, seed-phrase searching, or cryptocurrency transaction functionality.
 
 ## C2 design
 
