@@ -61,6 +61,8 @@ There is no Socket.IO, remote shell, screenshot capability, Python InvisibleFerr
 
 For readability, this article uses **WeaselBiscuit** as a proposed working name. It is not an established family name.  I made it up and I think its dope. 
 
+![WeaselBiscuit Kill Chain](attack-chain-image.png)
+
 ## Confirmed infection chain
 
 1. The NPM package is installed
