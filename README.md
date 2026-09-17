@@ -165,6 +165,29 @@ The divergences are equally important:
 
 Cisco Talos has reported that the distinction between BeaverTail and OtterCookie has blurred in recent campaigns, including Node.js keylogging, clipboard monitoring, extension/wallet data targeting, and changing C2 architectures. This makes a lineage relationship plausible but does not prove it. See: [BeaverTail and OtterCookie evolve with a new JavaScript module](https://blog.talosintelligence.com/beavertail-and-ottercookie/).
 
+## BeaverTail vs. OtterCookie vs. WeaselBiscuit — capability comparison
+
+| Capability | BeaverTail | OtterCookie | WeaselBiscuit |
+| --- | --- | --- | --- |
+| Runtime | JavaScript (also ported to Qt/native) | Node.js | Node.js |
+| Delivery | Fake-interview lure + malicious npm packages | Malicious npm packages | Malicious npm packages |
+| Staging | Loaded directly by lure package | Loaded directly by lure package | Npoint dead-drop → Base64 → in-memory `new Function` |
+| C2 channel | HTTP POST to hardcoded C2 | Socket.IO (bidirectional) | Polling HTTP (Express routes) |
+| Host reconnaissance (hostname, user, OS, hardware) | Yes | Yes | Yes |
+| Public IP + geolocation (nested `ipify` → `ip-api`) | Yes | Yes | Yes |
+| Chrome extension storage theft | Yes | Yes | Yes |
+| Hardcoded crypto-wallet extension ID list (MetaMask, Phantom, Coinbase, etc.) | Yes | Yes | **No** |
+| Browser credential DB decryption (Chrome Local State, macOS Keychain) | Yes | Partial (variant-dependent) | **No** |
+| Seed-phrase / wallet-address regex sweep of local files | Yes | Variant-dependent | **No** |
+| File exfiltration (documents, keystores, browser profiles) | Yes | Yes | **No** (extension storage only) |
+| Clipboard capture | Variant-dependent | Yes | Yes (operator-gated) |
+| Keylogging | Not typical | Yes (recent variants) | Yes, Windows only (operator-gated) |
+| Screenshot capture | No | Yes (recent variants) | **No** |
+| Remote shell / arbitrary command execution | Via InvisibleFerret handoff | Yes (over Socket.IO) | **No** |
+| InvisibleFerret / Python second-stage downloader | Yes | Yes (some variants) | **No** |
+| Persistence | LaunchAgent / registry / startup entries | Detached process + variant-specific | Detached Node process + `.pid` marker only |
+| Per-install / campaign tagging in code | Not observed publicly | Not observed publicly | Yes — numeric identifier (`10`, `12`, `44`, `79`, `95`, `99`) |
+
 ## Confidence and gaps
 
 | Claim | Confidence | Basis / limitation |
@@ -173,9 +196,16 @@ Cisco Talos has reported that the distinction between BeaverTail and OtterCookie
 | Second stage is an infostealer | High | Static collection and upload logic. |
 | `103.170.217.184:8787` is the C2 used by this stage | High | Retrieved configuration and observed client routes. |
 | The implementation is a simplified/new branch | Moderate | Distinct architecture and reduced capability set; could also be a commodity copy. |
-| Linked to BeaverTail/OtterCookie lineage | Low to moderate | Behavioral overlap only. |
-| DPRK attribution | Low | No exclusive infrastructure, operator evidence, or campaign context in the recovered material. |
+| Linked to BeaverTail/OtterCookie lineage | Moderate | Npoint dead-drop pattern is near-identical to prior DPRK npm samples; nested `api.ipify.org` → `ip-api.com` lookup matches DPRK stealer convention; Express polling C2 reads as a lightweight port of OtterCookie's Socket.IO control plane. |
+| DPRK attribution | Low to moderate | Consistent DPRK tradecraft signals (Npoint usage, nested public-IP + geolocation, per-install campaign markers), but no exclusive infrastructure or shared code recovered. |
 | A wholly new malware family | Low | Requires code-cluster, infrastructure, and victimology comparison. |
+
+### Tradecraft signals worth flagging
+
+- **Npoint.io as the dead-drop.** DPRK npm crews have been using `api.npoint.io` as a first-stage dead-drop for a long time, and WeaselBiscuit's usage is near-identical to prior DPRK samples: hardcoded UUID, JSON blob containing a Base64 `code` field, in-process `new Function` execution. Same service, same shape, same execution pattern.
+- **Nested public-IP + geolocation lookup.** The second stage queries `api.ipify.org` for the public IP, then feeds that IP to `ip-api.com` for geolocation. That two-step nested lookup is the same pattern seen in other DPRK-linked npm stealers — not a common commodity design.
+- **Express HTTP C2 as a lightweight port of OtterCookie's Socket.IO plane.** The C2 architecture is new — plain Express routes, polling-based, no bidirectional socket — but its shape (per-host status endpoints gating live collection, separate exfiltration endpoints for clipboard and keyboard, multipart upload for host recon and extension storage) reads as a stripped-down re-implementation of the same control model OtterCookie runs over Socket.IO.
+- **Campaign markers resemble PolinRider.** The numeric per-install identifiers (`10`, `12`, `44`, `79`, `95`, `99`) baked into both package names and stage uploads mirror the campaign-marker convention seen in the PolinRider cluster — the operator is tracking installs at the same granularity, using the same "ID in the package name" pattern.
 
 ## Recommended investigation priorities
 
