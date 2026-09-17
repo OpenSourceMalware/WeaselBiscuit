@@ -22,7 +22,7 @@ These are the 14 packages we've found so far:
 - process-tailwind     		- 2026-09-15T00:20:01Z
 
 **What WeaselBiscuit does**
-- Lands via NPM `import` — auto-runs a detached background Node process
+- Executed via NPM `import` — auto-runs a detached background Node process
 - Pulls its real payload from an [Npoint](https://www.npoint.io) URL, runs it in memory (never on disk)
 - Beacons to a shared HTTP C2 at `103.170.217.184:8787`
 - Profiles the host — hostname, user, OS, CPU/RAM, local + public IP, geolocation
@@ -63,29 +63,30 @@ For readability, this article uses **WeaselBiscuit** as a proposed working name.
 
 ## Confirmed infection chain
 
-1. An application imports `process-tailwind@1.1.99`.
-2. `index.js` automatically calls `initialize()`.
-3. `init.js` starts a detached `node loader.js` process and stores its PID in `<package-directory>/.pid`.
-4. `loader.js` retrieves JSON from:
+1. The NPM package is installed
+2. An application imports `process-tailwind@1.1.99`.
+3. `index.js` automatically calls `initialize()`.
+4. `init.js` starts a detached `node loader.js` process and stores its PID in `<package-directory>/.pid`.
+5. `loader.js` retrieves JSON from:
 
    ```text
    https://api.npoint.io/24c25d5f5fcbb0992a4f
    ```
 
-5. The loader Base64-decodes the JSON `code` field and executes it through `new Function`.
-6. The retrieved response is an exact match for the supplied second-stage artifact, SHA-256:
+6. The loader Base64-decodes the JSON `code` field and executes it through `new Function`.
+7. The retrieved response is an exact match for the supplied second-stage artifact, SHA-256:
 
    ```text
    7b15605f23b131b3eeea57e031ae7cb32fc4b78c7bbb2025aa7a561ea5ae5159
    ```
 
-7. The second stage obtains the C2 configuration from:
+8. The second stage obtains the C2 configuration from:
 
    ```text
    https://api.npoint.io/37c0a0c68bf7a94ed731
    ```
 
-8. The configuration resolves the C2 to:
+9. The configuration resolves the C2 to:
 
    ```text
    http://103.170.217.184:8787
