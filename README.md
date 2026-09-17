@@ -23,7 +23,8 @@ These are the 16 packages we've found so far:
 - @vibecheck-polid/process-runtime-utils - unknown
 - @railone/image-utils		- unknown
 
-**What WeaselBiscuit does**
+## What WeaselBiscuit does
+
 - Executed via NPM `import` — auto-runs a detached background Node process
 - Pulls its real payload from an [Npoint](https://www.npoint.io) URL, runs it in memory (never on disk)
 - Beacons to a shared HTTP C2 at `103.170.217.184:8787`
@@ -33,7 +34,8 @@ These are the 16 packages we've found so far:
 - Logs Windows keystrokes — on operator command
 - Tags each install with a numeric campaign ID (`10`, `12`, `44`, `79`, `95`, `99`) for server-side sorting
 
-**What it doesn't do (vs. BeaverTail / OtterCookie)**
+## What it doesn't do (vs. BeaverTail / OtterCookie)
+
 - No wallet-draining code, no hardcoded wallet extension ID list
 - No Chrome-password decryptor, no seed-phrase regex sweep
 - No InvisibleFerret / Python second stage
