@@ -2,9 +2,9 @@
 
 ![WeaselBiscuit Logo](WeaselBiscuit-logo-small.png)
 
-The OpenSourceMalware team spends a lot of time looking at malicious NPM packages, so you end up seeing the same patterns a lot.  So, when you see something new and innovative, it stands out.  That's exactly what happened this week when we found 11 NPM package that secretly hide a brand new JavaScript stealer.  It looks and feels like the DPRK's Beavertail and OtterCookie, but its different.  It's much smaller and more lightweight as many of the heavier functions have been stripped out.
+The OpenSourceMalware team spends a lot of time looking at malicious NPM packages, so you end up seeing the same patterns a lot.  So, when you see something new and innovative, it stands out.  That's exactly what happened this week when we found more than a dozen NPM packages that secretly hide a brand new JavaScript stealer.  It looks and feels like the DPRK's Beavertail and OtterCookie, but its different.  It's much smaller and more lightweight as many of the heavier functions have been stripped out.
 
-These are the 14 packages we've found so far:
+These are the 16 packages we've found so far:
 
 - laycot 	 		- 2026-09-16T13:51:46Z - version 1.3.10 still available on NPM
 - process-mite			- 2026-09-16T23:57:52Z
@@ -20,6 +20,8 @@ These are the 14 packages we've found so far:
 - id79-client          		- 2026-09-12T13:35:09Z
 - process-lhpm         		- 2026-09-15T00:44:34Z
 - process-tailwind     		- 2026-09-15T00:20:01Z
+- @vibecheck-polid/process-runtime-utils - unknown
+- @railone/image-utils		- unknown
 
 **What WeaselBiscuit does**
 - Executed via NPM `import` — auto-runs a detached background Node process
@@ -212,14 +214,21 @@ Cisco Talos has reported that the distinction between BeaverTail and OtterCookie
 - **Express HTTP C2 as a lightweight port of OtterCookie's Socket.IO plane.** The C2 architecture is new — plain Express routes, polling-based, no bidirectional socket — but its shape (per-host status endpoints gating live collection, separate exfiltration endpoints for clipboard and keyboard, multipart upload for host recon and extension storage) reads as a stripped-down re-implementation of the same control model OtterCookie runs over Socket.IO.
 - **Campaign markers resemble PolinRider.** The numeric per-install identifiers (`10`, `12`, `44`, `79`, `95`, `99`) baked into both package names and stage uploads mirror the campaign-marker convention seen in the PolinRider cluster — the operator is tracking installs at the same granularity, using the same "ID in the package name" pattern.
 
+## Detection engineering 
+
+Typical DPRK killchains are long affairs.  Five to seven stages normally.  This allows DPRK threat actors to iterate continuously at the beginning stages where detection typically happens. At the end of the kill chain there isn't much need to innovate and change things up.  So, this means that DPRK will do everything they can to hide their payloads leading to Beavertail, OtterCookie, etc. 
+
+So far that's not what is happening with WeaselBiscuit.  It has three stages, not seven, and the api.npoint.io endpoint is easily found in the NPM package loader.js file.  I've written three yara rules which you'll find in the [yara directory](https://github.com/OpenSourceMalware/WeaselBiscuit/tree/main/yara) to help you detect and identify these payloads early. However, I anticipate that if DPRK is in fact the author of WeaselBiscuit that this will change.  It makes sense for threat actors to start to obfuscate these first stage loaders better to make it harder for us to detect.
+
 ## Recommended investigation priorities
 
-1. Preserve the NPM tarball, package publication metadata, maintainer account, dependency graph, download history, and source repository references.
-2. Search public and internal telemetry for all six Npoint UUIDs, the C2 IP/port, the stage identifiers `10`, `12`, `79`, `95`, and `99`, and the API-route strings.
-3. Compare the loader and decoded stage against known BeaverTail/OtterCookie samples for shared functions, comments, string conventions, package names, and C2 patterns.
-4. Identify the importing parent application: the package itself has no npm lifecycle hook, so execution requires import or manual start.
-5. Review affected endpoints for `.pid`, Node child processes, PowerShell processes, and `%TEMP%\\kb-monitor\\keyboard-monitor-*.ps1`.
+1. Sign up for a free [OpenSourceMalware](https://opensourcemalware.com/auth?redirect=%2F) and scan all software packages for the presence of WeaselBiscuit.
+2. If you detect WeaselBiscuit in your software estate, immediate quarantine the host and preserve the NPM tarball, package publication metadata, maintainer account, dependency graph, download history, and source repository references.
+3. Search public and internal telemetry for all six Npoint UUIDs, the C2 IP/port, the stage identifiers `10`, `12`, `79`, `95`, and `99`, and the API-route strings.
+4. Compare the loader and decoded stage against known BeaverTail/OtterCookie samples for shared functions, comments, string conventions, package names, and C2 patterns.
+5. Identify the importing parent application: the package itself has no npm lifecycle hook, so execution requires import or manual start.
+6. Review affected endpoints for `.pid`, Node child processes, PowerShell processes, and `%TEMP%\\kb-monitor\\keyboard-monitor-*.ps1`.
 
 ## Bottom line
 
-Treat `process-tailwind` as a high-confidence malicious supply-chain package and a potentially important new data point in DPRK-linked JavaScript infostealer evolution. Treat the "new DPRK strain" label as a working investigative hypothesis until supported by corroborating code, infrastructure, or campaign evidence.
+Treat WeaselBiscuit as a critical threat. While it is not as 
