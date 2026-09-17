@@ -4,8 +4,10 @@
 
 The OpenSourceMalware team spends a lot of time looking at malicious NPM packages, so you end up seeing the same patterns a lot.  So, when you see something new and innovative, it stands out.  That's exactly what happened this week when we found 11 NPM package that secretly hide a brand new JavaScript stealer.  It looks and feels like the DPRK's Beavertail and OtterCookie, but its different.  It's much smaller and more lightweight as many of the heavier functions have been stripped out.
 
-These are the 11 packages we've found so far:
+These are the 14 packages we've found so far:
 
+- laycot 	 		- 2026-09-16T13:51:46Z - version 1.3.10 still available on NPM
+- process-mite			- 2026-09-16T23:57:52Z
 - @biz44/id10-client 		- 2026-09-12T13:51:46Z
 - @biz44/id12-client		- 2026-09-12T13:51:47Z
 - @biz44/id44-client		- 2026-09-12T08:03:37Z
@@ -20,7 +22,7 @@ These are the 11 packages we've found so far:
 - process-tailwind     		- 2026-09-15T00:20:01Z
 
 **What WeaselBiscuit does**
-- Lands via npm `import` — auto-runs a detached background Node process
+- Lands via NPM `import` — auto-runs a detached background Node process
 - Pulls its real payload from an [Npoint](https://www.npoint.io) URL, runs it in memory (never on disk)
 - Beacons to a shared HTTP C2 at `103.170.217.184:8787`
 - Profiles the host — hostname, user, OS, CPU/RAM, local + public IP, geolocation
@@ -91,7 +93,7 @@ For readability, this article uses **WeaselBiscuit** as a proposed working name.
 
 ## Campaign structure and identifiers
 
-The recovered package is not an isolated sample. Static analysis and user-authorized inert retrievals identified a cluster of cloned npm loaders that retrieve near-identical WeaselBiscuit stages from distinct Npoint URLs. The stages differ materially only in a numeric `identifier` field included in system-information and Chrome-extension uploads. This strongly suggests a server-side campaign, tenant, operator, or victim-group label.
+The recovered package is not an isolated sample. Static analysis and user-authorized inert retrievals identified a cluster of cloned NPM loaders that retrieve near-identical WeaselBiscuit stages from distinct Npoint URLs. The stages differ materially only in a numeric `identifier` field included in system-information and Chrome-extension uploads. This strongly suggests a server-side campaign, tenant, operator, or victim-group label.
 
 | First-stage resolver | Embedded stage identifier | Status |
 | --- | ---: | --- |
@@ -106,7 +108,7 @@ All five recovered stages use the same second Npoint configuration resolver, `ht
 
 The confirmed stage-level identifiers are therefore `10`, `12`, `79`, `95`, and `99`. They should be used as campaign-hunting markers, but their precise meaning is not yet known. The code does not label them as campaign IDs.
 
-### Related npm packages
+### Related NPM packages
 
 | Package | Package label | First-stage resolver |
 | --- | --- | --- |
@@ -170,7 +172,7 @@ Cisco Talos has reported that the distinction between BeaverTail and OtterCookie
 | Capability | BeaverTail | OtterCookie | WeaselBiscuit |
 | --- | --- | --- | --- |
 | Runtime | JavaScript (also ported to Qt/native) | Node.js | Node.js |
-| Delivery | Fake-interview lure + malicious npm packages | Malicious npm packages | Malicious npm packages |
+| Delivery | Fake-interview lure + malicious NPM packages | Malicious NPM packages | Malicious NPM packages |
 | Staging | Loaded directly by lure package | Loaded directly by lure package | Npoint dead-drop → Base64 → in-memory `new Function` |
 | C2 channel | HTTP POST to hardcoded C2 | Socket.IO (bidirectional) | Polling HTTP (Express routes) |
 | Host reconnaissance (hostname, user, OS, hardware) | Yes | Yes | Yes |
@@ -196,20 +198,20 @@ Cisco Talos has reported that the distinction between BeaverTail and OtterCookie
 | Second stage is an infostealer | High | Static collection and upload logic. |
 | `103.170.217.184:8787` is the C2 used by this stage | High | Retrieved configuration and observed client routes. |
 | The implementation is a simplified/new branch | Moderate | Distinct architecture and reduced capability set; could also be a commodity copy. |
-| Linked to BeaverTail/OtterCookie lineage | Moderate | Npoint dead-drop pattern is near-identical to prior DPRK npm samples; nested `api.ipify.org` → `ip-api.com` lookup matches DPRK stealer convention; Express polling C2 reads as a lightweight port of OtterCookie's Socket.IO control plane. |
+| Linked to BeaverTail/OtterCookie lineage | Moderate | Npoint dead-drop pattern is near-identical to prior DPRK NPM samples; nested `api.ipify.org` → `ip-api.com` lookup matches DPRK stealer convention; Express polling C2 reads as a lightweight port of OtterCookie's Socket.IO control plane. |
 | DPRK attribution | Low to moderate | Consistent DPRK tradecraft signals (Npoint usage, nested public-IP + geolocation, per-install campaign markers), but no exclusive infrastructure or shared code recovered. |
 | A wholly new malware family | Low | Requires code-cluster, infrastructure, and victimology comparison. |
 
 ### Tradecraft signals worth flagging
 
-- **Npoint.io as the dead-drop.** DPRK npm crews have been using `api.npoint.io` as a first-stage dead-drop for a long time, and WeaselBiscuit's usage is near-identical to prior DPRK samples: hardcoded UUID, JSON blob containing a Base64 `code` field, in-process `new Function` execution. Same service, same shape, same execution pattern.
-- **Nested public-IP + geolocation lookup.** The second stage queries `api.ipify.org` for the public IP, then feeds that IP to `ip-api.com` for geolocation. That two-step nested lookup is the same pattern seen in other DPRK-linked npm stealers — not a common commodity design.
+- **Npoint.io as the dead-drop.** DPRK NPM crews have been using `api.npoint.io` as a first-stage dead-drop for a long time, and WeaselBiscuit's usage is near-identical to prior DPRK samples: hardcoded UUID, JSON blob containing a Base64 `code` field, in-process `new Function` execution. Same service, same shape, same execution pattern.
+- **Nested public-IP + geolocation lookup.** The second stage queries `api.ipify.org` for the public IP, then feeds that IP to `ip-api.com` for geolocation. That two-step nested lookup is the same pattern seen in other DPRK-linked NPM stealers — not a common commodity design.
 - **Express HTTP C2 as a lightweight port of OtterCookie's Socket.IO plane.** The C2 architecture is new — plain Express routes, polling-based, no bidirectional socket — but its shape (per-host status endpoints gating live collection, separate exfiltration endpoints for clipboard and keyboard, multipart upload for host recon and extension storage) reads as a stripped-down re-implementation of the same control model OtterCookie runs over Socket.IO.
 - **Campaign markers resemble PolinRider.** The numeric per-install identifiers (`10`, `12`, `44`, `79`, `95`, `99`) baked into both package names and stage uploads mirror the campaign-marker convention seen in the PolinRider cluster — the operator is tracking installs at the same granularity, using the same "ID in the package name" pattern.
 
 ## Recommended investigation priorities
 
-1. Preserve the npm tarball, package publication metadata, maintainer account, dependency graph, download history, and source repository references.
+1. Preserve the NPM tarball, package publication metadata, maintainer account, dependency graph, download history, and source repository references.
 2. Search public and internal telemetry for all six Npoint UUIDs, the C2 IP/port, the stage identifiers `10`, `12`, `79`, `95`, and `99`, and the API-route strings.
 3. Compare the loader and decoded stage against known BeaverTail/OtterCookie samples for shared functions, comments, string conventions, package names, and C2 patterns.
 4. Identify the importing parent application: the package itself has no npm lifecycle hook, so execution requires import or manual start.
