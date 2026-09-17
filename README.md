@@ -19,6 +19,24 @@ These are the 11 packages we've found so far:
 - process-lhpm         		- 2026-09-15T00:44:34Z
 - process-tailwind     		- 2026-09-15T00:20:01Z
 
+**What WeaselBiscuit does**
+- Lands via npm `import` — auto-runs a detached background Node process
+- Pulls its real payload from an [Npoint](https://www.npoint.io) URL, runs it in memory (never on disk)
+- Beacons to a shared HTTP C2 at `103.170.217.184:8787`
+- Profiles the host — hostname, user, OS, CPU/RAM, local + public IP, geolocation
+- Steals Chrome extension storage on Windows, macOS, Linux (where wallet extensions keep signing state)
+- Captures clipboard contents — on operator command
+- Logs Windows keystrokes — on operator command
+- Tags each install with a numeric campaign ID (`10`, `12`, `44`, `79`, `95`, `99`) for server-side sorting
+
+**What it doesn't do (vs. BeaverTail / OtterCookie)**
+- No wallet-draining code, no hardcoded wallet extension ID list
+- No Chrome-password decryptor, no seed-phrase regex sweep
+- No InvisibleFerret / Python second stage
+- No screenshot module
+- No Socket.IO / WebSocket / remote shell — pure polling HTTP
+- No persistence beyond the detached Node process and `.pid` file
+
 ## How we found it
 
 Our automation identified these packages as malicious and grouped them together as they shared IOCs.  We quickly identified this as an emerging Node.js infostealer architecture that warrants investigation as a **possible new or lightly documented DPRK-linked strain**, or as a simplified branch/fork of the BeaverTail/OtterCookie ecosystem.
